@@ -23,7 +23,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     if (exception instanceof DomainError) {
       const { status, body } = this.domainErrorHttpMapper.toHttp(exception);
-      this.logger.error(`Domain error: ${JSON.stringify({ status, body })}`);
+      this.logger.warn(`Domain error: ${JSON.stringify({ status, body })}`);
       return response.status(status).send(body);
     }
 
@@ -31,9 +31,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       const status = exception.getStatus();
       const payload = exception.getResponse();
 
-      this.logger.error(
-        `Http exception: ${JSON.stringify({ status, payload })}`,
-      );
+      this.logger.error(exception);
       return response.status(status).send(payload);
     }
 

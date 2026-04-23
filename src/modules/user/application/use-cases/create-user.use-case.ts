@@ -1,5 +1,5 @@
+import { DomainError } from '@/common/errors/domain.error';
 import { UserEntity } from '@/modules/user/domain/entities/user.entity';
-import { DomainError } from '@/modules/user/domain/errors/domain.error';
 import type { IUserRepository } from '@/modules/user/domain/repositories/user.repository.interface';
 import { USER_REPOSITORY } from '@/modules/user/user.di-token';
 import { Inject, Injectable } from '@nestjs/common';
@@ -20,7 +20,7 @@ export class CreateUserUseCase {
   async execute(input: CreateUserInput): Promise<UserEntity> {
     const existingUser = await this.userRepository.findByEmail(input.email);
     if (existingUser) {
-      throw new DomainError('User already exists', 409);
+      throw new DomainError('User already exists', 'USER_ALREADY_EXISTS');
     }
     const user = new UserEntity(
       crypto.randomUUID(),

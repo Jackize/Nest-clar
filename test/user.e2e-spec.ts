@@ -1,4 +1,5 @@
 import { AppModule } from '@/app.module';
+import { configureHttpApp } from '@/common/configure-http-app';
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
@@ -13,6 +14,7 @@ describe('User API (integration)', () => {
       imports: [AppModule],
     }).compile();
     app = moduleRef.createNestApplication();
+    configureHttpApp(app);
     await app.init();
   });
 

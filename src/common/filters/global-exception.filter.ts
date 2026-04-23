@@ -1,25 +1,40 @@
-import { DomainError } from '@/modules/user/domain/errors/domain.error';
+import { DomainError } from '@/common/errors/domain.error';
+import { DomainErrorHttpMapper } from '@/common/http/domain-error-http.mapper';
 import {
   ArgumentsHost,
   Catch,
   ExceptionFilter,
+  HttpException,
   HttpStatus,
+  Injectable,
+  Logger,
 } from '@nestjs/common';
 import { Response } from 'express';
 
 @Catch()
+@Injectable()
 export class GlobalExceptionFilter implements ExceptionFilter {
+  private readonly logger = new Logger(GlobalExceptionFilter.name);
+  constructor(private readonly domainErrorHttpMapper: DomainErrorHttpMapper) {}
+
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
 
     if (exception instanceof DomainError) {
-      return response.status(exception.statusCode).send({
-        message: exception.message,
-        statusCode: exception.statusCode,
-      });
+      const { status, body } = this.domainErrorHttpMapper.toHttp(exception);
+      this.logger.warn(`Domain error: ${JSON.stringify({ status, body })}`);
+      return response.status(status).send(body);
     }
 
+    if (exception instanceof HttpException) {
+      const status = exception.getStatus();
+      const payload = exception.getResponse();
+
+      this.logger.error(exception);
+      return response.status(status).send(payload);
+    }
+    this.logger.error(exception);
     return response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({
       message: 'Internal server error',
       code: 'INTERNAL_SERVER_ERROR',

@@ -1,4 +1,4 @@
-import { DomainError } from '../../domain/errors/domain.error';
+import { DomainError } from '@/common/errors/domain.error';
 import { CreateUserUseCase } from './create-user.use-case';
 
 describe('CreateUserUseCase', () => {

@@ -1,4 +1,5 @@
-import { DomainError } from '@/modules/user/domain/errors/domain.error';
+import { DomainError } from '@/common/errors/domain.error';
+import { mapDomainErrorToHttp } from '@/common/http/domain-error.http-map';
 import {
   ArgumentsHost,
   Catch,
@@ -14,10 +15,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
 
     if (exception instanceof DomainError) {
-      return response.status(exception.statusCode).send({
-        message: exception.message,
-        statusCode: exception.statusCode,
-      });
+      const { status, body } = mapDomainErrorToHttp(exception);
+      return response.status(status).send(body);
     }
 
     return response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({

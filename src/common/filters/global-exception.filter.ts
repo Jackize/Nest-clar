@@ -7,12 +7,14 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  Logger,
 } from '@nestjs/common';
 import { Response } from 'express';
 
 @Catch()
 @Injectable()
 export class GlobalExceptionFilter implements ExceptionFilter {
+  private readonly logger = new Logger(GlobalExceptionFilter.name);
   constructor(private readonly domainErrorHttpMapper: DomainErrorHttpMapper) {}
 
   catch(exception: unknown, host: ArgumentsHost) {
@@ -21,6 +23,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     if (exception instanceof DomainError) {
       const { status, body } = this.domainErrorHttpMapper.toHttp(exception);
+      this.logger.error(`Domain error: ${JSON.stringify({ status, body })}`);
       return response.status(status).send(body);
     }
 
@@ -28,6 +31,9 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       const status = exception.getStatus();
       const payload = exception.getResponse();
 
+      this.logger.error(
+        `Http exception: ${JSON.stringify({ status, payload })}`,
+      );
       return response.status(status).send(payload);
     }
 

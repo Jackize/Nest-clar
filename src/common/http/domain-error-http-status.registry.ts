@@ -6,11 +6,17 @@ export class DomainErrorHttpStatusRegistry {
   private readonly merged: DomainErrorHttpStatusMap = {};
 
   register(map: DomainErrorHttpStatusMap): void {
-    Object.assign(this.merged, map);
+    for (const [code, status] of Object.entries(map)) {
+      if (this.merged[code] && this.merged[code] !== status) {
+        throw new Error(
+          `Conflict detected: Error code "${code}" is already registered with a different status.`,
+        );
+      }
+      this.merged[code] = status;
+    }
   }
 
   getStatus(code: string): HttpStatus | undefined {
     return this.merged[code];
   }
 }
-

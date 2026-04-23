@@ -9,5 +9,5 @@ export function configureHttpApp(app: INestApplication): void {
       transform: true,
     }),
   );
-  app.useGlobalFilters(new GlobalExceptionFilter());
+  app.useGlobalFilters(app.get(GlobalExceptionFilter));
 }

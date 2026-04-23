@@ -34,7 +34,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       this.logger.error(exception);
       return response.status(status).send(payload);
     }
-
+    this.logger.error(exception);
     return response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({
       message: 'Internal server error',
       code: 'INTERNAL_SERVER_ERROR',

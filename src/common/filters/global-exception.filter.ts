@@ -20,11 +20,18 @@ export class GlobalExceptionFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
+    const request = ctx.getRequest<Request>();
 
     if (exception instanceof DomainError) {
       const { status, body } = this.domainErrorHttpMapper.toHttp(exception);
       this.logger.warn(`Domain error: ${JSON.stringify({ status, body })}`);
-      return response.status(status).send(body);
+      return response.status(status).json({
+        success: false,
+        message: body.message,
+        code: body.code,
+        timestamp: new Date().toISOString(),
+        path: request.url,
+      });
     }
 
     if (exception instanceof HttpException) {
@@ -32,12 +39,26 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       const payload = exception.getResponse();
 
       this.logger.error(exception);
-      return response.status(status).send(payload);
+      return response.status(status).json({
+        success: false,
+        code: HttpStatus[status],
+        message:
+          typeof payload === 'object' &&
+          payload !== null &&
+          'message' in payload
+            ? (payload as { message: string | string[] }).message
+            : exception.message,
+        timestamp: new Date().toISOString(),
+        path: request.url,
+      });
     }
     this.logger.error(exception);
-    return response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({
+    return response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      code: HttpStatus[HttpStatus.INTERNAL_SERVER_ERROR],
       message: 'Internal server error',
-      code: 'INTERNAL_SERVER_ERROR',
+      timestamp: new Date().toISOString(),
+      path: request.url,
     });
   }
 }

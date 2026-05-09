@@ -28,11 +28,12 @@ describe('User API (integration)', () => {
       name: 'Test User',
     });
     expect(response.status).toBe(201);
-    expect(response.body.email).toBe('test@example.com');
-    expect(response.body.name).toBe('test user');
-    expect(typeof response.body.id).toBe('string');
-    expect(response.body.id.length).toBeGreaterThan(0);
-    createdUserId = response.body.id;
+    expect(response.body.success).toBe(true);
+    expect(response.body.data.email).toBe('test@example.com');
+    expect(response.body.data.name).toBe('test user');
+    expect(typeof response.body.data.id).toBe('string');
+    expect(response.body.data.id.length).toBeGreaterThan(0);
+    createdUserId = response.body.data.id;
   });
 
   it('should return 409 if user already exists', async () => {
@@ -48,8 +49,11 @@ describe('User API (integration)', () => {
       `/users/${createdUserId}`,
     );
     expect(response.status).toBe(200);
-    expect(response.body.email).toBe('test@example.com');
-    expect(response.body.name).toBe('test user');
+    expect(response.body.success).toBe(true);
+    expect(response.body.data.email).toBe('test@example.com');
+    expect(response.body.data.name).toBe('test user');
+    expect(response.body.timestamp).toBeDefined();
+    expect(response.body.path).toBe(`/users/${createdUserId}`);
   });
 
   it('should return 404 if user not found', async () => {
@@ -57,5 +61,10 @@ describe('User API (integration)', () => {
       `/users/1234567890`,
     );
     expect(response.status).toBe(404);
+    expect(response.body.success).toBe(false);
+    expect(response.body.code).toBe('USER_NOT_FOUND');
+    expect(response.body.message).toBe('User not found');
+    expect(response.body.timestamp).toBeDefined();
+    expect(response.body.path).toBe(`/users/1234567890`);
   });
 });

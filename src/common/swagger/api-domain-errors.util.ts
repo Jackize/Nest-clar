@@ -16,11 +16,20 @@ export function normalizeDomainErrors(
   domainErrors: ApiDomainErrorSpec[] | DomainErrorHttpStatusMap,
 ) {
   return Array.isArray(domainErrors)
-    ? domainErrors.map((spec) => (typeof spec === 'string' ? { code: spec } : spec))
+    ? domainErrors.map((spec) =>
+        typeof spec === 'string' ? { code: spec } : spec,
+      )
     : Object.entries(domainErrors).map(([code, status]) => ({ code, status }));
 }
 
-function groupByStatus(errors: Array<{ code: string; status?: HttpStatus; message?: string; description?: string }>) {
+function groupByStatus(
+  errors: Array<{
+    code: string;
+    status?: HttpStatus;
+    message?: string;
+    description?: string;
+  }>,
+) {
   const byStatus = new Map<HttpStatus, typeof errors>();
   for (const err of errors) {
     const status = err.status ?? HttpStatus.BAD_REQUEST;
@@ -57,6 +66,7 @@ export function ApiDomainErrors(
     );
 
     return ApiResponse({
+      type: ApiErrorResponseDto,
       status,
       description:
         errs.length === 1
@@ -71,8 +81,10 @@ export function ApiDomainErrors(
     });
   });
 
-  return applyDecorators(ApiExtraModels(ApiErrorResponseDto), ...errorResponses);
+  return applyDecorators(
+    ApiExtraModels(ApiErrorResponseDto),
+    ...errorResponses,
+  );
 }
 
 export type ApiSuccessDto = Type<unknown>;
-

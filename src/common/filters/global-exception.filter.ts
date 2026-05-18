@@ -24,6 +24,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     if (exception instanceof DomainError) {
       const { status, body } = this.domainErrorHttpMapper.toHttp(exception);
+
       this.logger.warn(`Domain error: ${JSON.stringify({ status, body })}`);
       return response.status(status).json({
         success: false,
@@ -52,6 +53,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         path: request.url,
       });
     }
+
     this.logger.error(exception);
     return response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false,

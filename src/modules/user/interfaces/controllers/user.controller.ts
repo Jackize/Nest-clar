@@ -27,6 +27,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { DeleteUserByIdUseCase } from '../../application/use-cases/delete-user-by-id.use-case';
 import { GetAllUserUseCase } from '../../application/use-cases/get-all-user.use-case';
 import { PatchUserUseCase } from '../../application/use-cases/patch-user.use-case';
+import { PatchUserDto } from '../dto/patch-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 
 @ApiTags('Users')
@@ -91,7 +92,7 @@ export class UserController {
     INVALID_EMAIL: HttpStatus.BAD_REQUEST,
     NAME_TOO_SHORT: HttpStatus.BAD_REQUEST,
   })
-  async patch(@Param('id') id: string, @Body() body: Partial<UpdateUserDto>) {
+  async patch(@Param('id') id: string, @Body() body: PatchUserDto) {
     const user = await this.patchUser.execute(id, body);
     return UserMapper.toResponse(user);
   }

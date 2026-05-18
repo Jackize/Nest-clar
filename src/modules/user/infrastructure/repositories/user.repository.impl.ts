@@ -24,11 +24,13 @@ export class UserRepositoryImpl implements IUserRepository {
     limit: number,
     sortOrder: 'asc' | 'desc',
   ): Promise<UserEntity[]> {
-    return this.users.slice((page - 1) * limit, page * limit).sort((a, b) => {
-      return sortOrder === 'asc'
-        ? a.name.localeCompare(b.name)
-        : b.name.localeCompare(a.name);
-    });
+    return this.users
+      .sort((a, b) => {
+        return sortOrder === 'asc'
+          ? a.name.localeCompare(b.name)
+          : b.name.localeCompare(a.name);
+      })
+      .slice((page - 1) * limit, page * limit);
   }
 
   async update(id: string, user: UserEntity): Promise<UserEntity | null> {

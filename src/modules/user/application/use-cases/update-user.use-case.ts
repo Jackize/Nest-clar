@@ -18,7 +18,7 @@ export class UpdateUserUseCase {
 
   async execute(id: string, input: UpdateUserInput): Promise<UserEntity> {
     const newInformationUser = new UserEntity(
-      crypto.randomUUID(),
+      id,
       input.email.trim(),
       input.name.trim().toLowerCase(),
     );

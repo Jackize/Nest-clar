@@ -58,15 +58,17 @@ export function ApiDomainErrors(
           summary: e.code,
           description: e.description,
           value: {
-            message: e.message ?? defaultMessageFromCode(e.code),
+            success: false,
             code: e.code,
+            message: e.message ?? defaultMessageFromCode(e.code),
+            timestamp: new Date().toISOString(),
+            path: '/',
           },
         },
       ]),
     );
 
     return ApiResponse({
-      type: ApiErrorResponseDto,
       status,
       description:
         errs.length === 1

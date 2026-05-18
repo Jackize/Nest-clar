@@ -1,5 +1,5 @@
 import type { DomainErrorHttpStatusMap } from '@/common/http/domain-error-http-status.types';
-import { ApiErrorResponseDto } from '@/common/swagger/api-error-response.dto';
+import { ApiErrorResponseDto } from '@/common/swagger/dto/api-error-response.dto';
 import { HttpStatus, Type, applyDecorators } from '@nestjs/common';
 import { ApiExtraModels, ApiResponse, getSchemaPath } from '@nestjs/swagger';
 

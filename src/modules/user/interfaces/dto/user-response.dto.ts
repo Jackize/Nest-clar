@@ -1,3 +1,4 @@
+import { ApiSuccessResponseDto } from '@/common/swagger/dto/api-success-response.dto';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UserResponseDto {
@@ -14,24 +15,9 @@ export class UserResponseDto {
   email: string;
 }
 
-export class UserApiSuccessResponseDto {
-  @ApiProperty({
-    example: true,
-  })
-  success: true;
-
+export class UserApiSuccessResponseDto extends ApiSuccessResponseDto {
   @ApiProperty({
     type: UserResponseDto,
   })
   data: UserResponseDto;
-
-  @ApiProperty({
-    example: '2026-05-09T10:30:00.000Z',
-  })
-  timestamp: string;
-
-  @ApiProperty({
-    example: '/users',
-  })
-  path: string;
 }

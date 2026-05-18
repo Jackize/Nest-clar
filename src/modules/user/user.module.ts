@@ -1,8 +1,12 @@
 import { Module } from '@nestjs/common';
 import { CreateUserUseCase } from './application/use-cases/create-user.use-case';
+import { DeleteUserByIdUseCase } from './application/use-cases/delete-user-by-id.use-case';
+import { GetAllUserUseCase } from './application/use-cases/get-all-user.use-case';
 import { GetUserByIdUseCase } from './application/use-cases/get-user-by-id.use-case';
-import { UserRepositoryImpl } from './infrastructure/repositories/user.repository.impl';
+import { PatchUserUseCase } from './application/use-cases/patch-user.use-case';
+import { UpdateUserUseCase } from './application/use-cases/update-user.use-case';
 import { UserDomainErrorHttpStatusRegistrar } from './http/user-domain-error-http-status.registrar';
+import { UserRepositoryImpl } from './infrastructure/repositories/user.repository.impl';
 import { UserController } from './interfaces/controllers/user.controller';
 import { USER_REPOSITORY } from './user.di-token';
 
@@ -12,6 +16,10 @@ import { USER_REPOSITORY } from './user.di-token';
     UserDomainErrorHttpStatusRegistrar,
     CreateUserUseCase,
     GetUserByIdUseCase,
+    GetAllUserUseCase,
+    UpdateUserUseCase,
+    PatchUserUseCase,
+    DeleteUserByIdUseCase,
     UserRepositoryImpl,
     {
       provide: USER_REPOSITORY,

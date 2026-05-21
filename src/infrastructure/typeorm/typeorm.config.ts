@@ -10,6 +10,6 @@ export function buildTypeOrmOptions(): DataSourceOptions {
     password: process.env.POSTGRES_PASSWORD ?? 'postgres',
     database: process.env.POSTGRES_DB ?? 'nest_clar',
     entities: [UserOrmEntity],
-    synchronize: process.env.NODE_ENV !== 'production',
+    synchronize: process.env.NODE_ENV === 'development',
   };
 }

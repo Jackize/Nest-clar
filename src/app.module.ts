@@ -10,7 +10,9 @@ import { UserModule } from './modules/user/user.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    TypeOrmModule.forRoot(buildTypeOrmOptions()),
+    TypeOrmModule.forRootAsync({
+      useFactory: () => buildTypeOrmOptions(),
+    }),
     CommonHttpModule,
     UserModule,
   ],

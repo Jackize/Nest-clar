@@ -36,7 +36,7 @@ export class UserRepositoryTypeORMImpl implements IUserRepository {
   ): Promise<UserEntity[]> {
     const rows = await this.userRepository.find({
       order: { name: sortOrder.toUpperCase() as 'ASC' | 'DESC' },
-      skip: (page - 1) * limit,
+      skip: Math.max(0, (page - 1) * limit),
       take: limit,
     });
     return rows.map(UserPersistenceMapper.toDomain);
@@ -47,10 +47,11 @@ export class UserRepositoryTypeORMImpl implements IUserRepository {
     if (!orm) {
       return null;
     }
-    orm.email = user.email;
-    orm.name = user.name;
-    await this.userRepository.save(orm);
-    return user;
+    const domain = UserPersistenceMapper.toDomain(orm);
+    domain.changeEmail(user.email);
+    domain.updateName(user.name);
+    await this.userRepository.save(UserPersistenceMapper.toOrm(domain));
+    return domain;
   }
 
   async patch(

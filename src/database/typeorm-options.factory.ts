@@ -33,9 +33,7 @@ function getCommonOptions(
   };
 }
 
-function createReplicationOptions(
-  config: ConfigService,
-): TypeOrmModuleOptions {
+function createReplicationOptions(config: ConfigService): TypeOrmModuleOptions {
   const credentials = getPostgresCredentials(config);
 
   const master: PostgresConnectionCredentialsOptions = {
@@ -65,6 +63,10 @@ function createReplicationOptions(
 
   return {
     type: 'postgres',
+    /**
+     * Replication setup.
+     * @see https://typeorm.io/replication
+     */
     replication: {
       master,
       slaves,

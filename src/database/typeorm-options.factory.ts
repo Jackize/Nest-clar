@@ -9,15 +9,14 @@ export function createTypeOrmOptions(
   return {
     type: 'postgres',
     host: config.get<string>('POSTGRES_HOST', 'localhost'),
-    port: Number.parseInt(
-      config.get<string>('POSTGRES_PORT', '5432'),
-      10,
-    ),
+    port: Number.parseInt(config.get<string>('POSTGRES_PORT', '5432'), 10),
     username: config.get<string>('POSTGRES_USER', 'postgres'),
     password: config.get<string>('POSTGRES_PASSWORD', 'postgres'),
     database: config.get<string>('POSTGRES_DB', 'nestjs_clar'),
     autoLoadEntities: true,
-    synchronize: config.get<string>('TYPEORM_SYNC', 'false') === 'true',
+    synchronize:
+      nodeEnv !== 'production' &&
+      config.get<string>('TYPEORM_SYNC', 'false') === 'true',
     logging: nodeEnv !== 'production',
   };
 }

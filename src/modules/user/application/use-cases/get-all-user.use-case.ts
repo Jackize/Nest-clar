@@ -11,11 +11,7 @@ export class GetAllUserUseCase {
     private readonly userRepository: IUserRepository,
   ) {}
 
-  async execute(
-    page: number,
-    limit: number,
-    sortOrder: 'asc' | 'desc',
-  ): Promise<UserEntity[]> {
+  async execute(page: number, limit: number, sortOrder: 'asc' | 'desc'): Promise<UserEntity[]> {
     const users = await this.userRepository.findAll(page, limit, sortOrder);
     if (!users) {
       throw new DomainError('No users found', 'NO_USERS_FOUND');

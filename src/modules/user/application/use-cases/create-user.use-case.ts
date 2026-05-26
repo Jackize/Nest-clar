@@ -16,18 +16,16 @@ export class CreateUserUseCase {
   constructor(
     @Inject(USER_REPOSITORY)
     private readonly userRepository: IUserRepository,
-  ) { }
+  ) {}
 
   async execute(input: CreateUserInput): Promise<UserEntity> {
-    const existingUser = await this.userRepository.findByEmail(input.email.trim(), { consistency: ReadConsistency.STRONG });
+    const existingUser = await this.userRepository.findByEmail(input.email.trim(), {
+      consistency: ReadConsistency.STRONG,
+    });
     if (existingUser) {
       throw new DomainError('User already exists', 'USER_ALREADY_EXISTS');
     }
-    const user = new UserEntity(
-      crypto.randomUUID(),
-      input.email.trim(),
-      input.name.trim().toLowerCase(),
-    );
+    const user = new UserEntity(crypto.randomUUID(), input.email.trim(), input.name.trim().toLowerCase());
     return await this.userRepository.save(user);
   }
 }

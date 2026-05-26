@@ -14,4 +14,3 @@ export class UserDomainErrorHttpStatusRegistrar implements OnModuleInit {
     this.registry.register(POST_USER_DOMAIN_ERROR_HTTP_STATUS);
   }
 }
-

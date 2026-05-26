@@ -45,9 +45,7 @@ describe('User API (integration)', () => {
   });
 
   it('should get a user by id', async () => {
-    const response = await request(app.getHttpServer()).get(
-      `/users/${createdUserId}`,
-    );
+    const response = await request(app.getHttpServer()).get(`/users/${createdUserId}`);
     expect(response.status).toBe(200);
     expect(response.body.success).toBe(true);
     expect(response.body.data.email).toBe('test@example.com');
@@ -68,12 +66,10 @@ describe('User API (integration)', () => {
   });
 
   it('should update a user', async () => {
-    const response = await request(app.getHttpServer())
-      .put(`/users/${createdUserId}`)
-      .send({
-        email: 'test2@example.com',
-        name: 'Test User 2',
-      });
+    const response = await request(app.getHttpServer()).put(`/users/${createdUserId}`).send({
+      email: 'test2@example.com',
+      name: 'Test User 2',
+    });
     expect(response.status).toBe(200);
     expect(response.body.success).toBe(true);
     expect(response.body.data.email).toBe('test2@example.com');
@@ -83,12 +79,10 @@ describe('User API (integration)', () => {
   });
 
   it('should patch a user', async () => {
-    const response = await request(app.getHttpServer())
-      .patch(`/users/${createdUserId}`)
-      .send({
-        email: 'test3@example.com',
-        name: 'Test User 3',
-      });
+    const response = await request(app.getHttpServer()).patch(`/users/${createdUserId}`).send({
+      email: 'test3@example.com',
+      name: 'Test User 3',
+    });
     expect(response.status).toBe(200);
     expect(response.body.success).toBe(true);
     expect(response.body.data.email).toBe('test3@example.com');
@@ -98,9 +92,7 @@ describe('User API (integration)', () => {
   });
 
   it('should delete a user', async () => {
-    const response = await request(app.getHttpServer()).delete(
-      `/users/${createdUserId}`,
-    );
+    const response = await request(app.getHttpServer()).delete(`/users/${createdUserId}`);
     expect(response.status).toBe(200);
     expect(response.body.success).toBe(true);
     expect(response.body.timestamp).toBeDefined();
@@ -108,9 +100,7 @@ describe('User API (integration)', () => {
   });
 
   it('should return 404 if user not found when getting a user by id', async () => {
-    const response = await request(app.getHttpServer()).get(
-      `/users/1234567890`,
-    );
+    const response = await request(app.getHttpServer()).get(`/users/1234567890`);
     expect(response.status).toBe(404);
     expect(response.body.success).toBe(false);
     expect(response.body.code).toBe('USER_NOT_FOUND');
@@ -120,12 +110,10 @@ describe('User API (integration)', () => {
   });
 
   it('should return 404 if no users found when updating a user', async () => {
-    const response = await request(app.getHttpServer())
-      .put('/users/1234567890')
-      .send({
-        email: 'test@example.com',
-        name: 'Test User',
-      });
+    const response = await request(app.getHttpServer()).put('/users/1234567890').send({
+      email: 'test@example.com',
+      name: 'Test User',
+    });
     expect(response.status).toBe(404);
     expect(response.body.success).toBe(false);
     expect(response.body.code).toBe('USER_NOT_FOUND');
@@ -133,9 +121,7 @@ describe('User API (integration)', () => {
   });
 
   it('should return 404 if no users found when deleting a user', async () => {
-    const response = await request(app.getHttpServer()).delete(
-      '/users/1234567890',
-    );
+    const response = await request(app.getHttpServer()).delete('/users/1234567890');
     expect(response.status).toBe(404);
     expect(response.body.success).toBe(false);
     expect(response.body.code).toBe('USER_NOT_FOUND');
@@ -143,12 +129,10 @@ describe('User API (integration)', () => {
   });
 
   it('should return 404 if no users found when patching a user', async () => {
-    const response = await request(app.getHttpServer())
-      .patch('/users/1234567890')
-      .send({
-        email: 'test@example.com',
-        name: 'Test User',
-      });
+    const response = await request(app.getHttpServer()).patch('/users/1234567890').send({
+      email: 'test@example.com',
+      name: 'Test User',
+    });
     expect(response.status).toBe(404);
     expect(response.body.success).toBe(false);
   });

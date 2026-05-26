@@ -1,48 +1,38 @@
-import { RepositoryOptions } from '@/database/interfaces/repository-options.interface';
-import { BaseRepository } from '@/database/repositories/base.repository';
 import { UserEntity } from '@/modules/user/domain/entities/user.entity';
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { IUserRepository } from '../../domain/repositories/user.repository.interface';
 import { UserOrmEntity } from '../persistence/user.orm-entity';
 
 @Injectable()
-export class UserRepositoryTypeORMImpl extends BaseRepository<UserOrmEntity> implements IUserRepository {
+export class UserRepositoryTypeORMImpl implements IUserRepository {
   constructor(
-    @InjectDataSource()
-    dataSource: DataSource,
-  ) {
-    super(dataSource);
-  }
+    @InjectRepository(UserOrmEntity)
+    private readonly repo: Repository<UserOrmEntity>,
+  ) { }
 
   async save(user: UserEntity): Promise<UserEntity> {
-    await this.withMasterRepository(UserOrmEntity, async (repo) => {
-      await repo.save({
-        id: user.id,
-        email: user.email,
-        name: user.name,
-      })
-    })
+    await this.repo.insert({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+    });
     return user;
   }
 
-  async findByEmail(email: string, options?: RepositoryOptions): Promise<UserEntity | null> {
-    const row = await this.withRepository(UserOrmEntity, options, async (repo) => {
-      return await repo.findOne({
-        where: { email },
-        select: ['id', 'email', 'name'],
-      });
+  async findByEmail(email: string): Promise<UserEntity | null> {
+    const row = await this.repo.findOne({
+      where: { email },
+      select: ['id', 'email', 'name'],
     });
     return row ? this.toDomain(row) : null;
   }
 
-  async findById(id: string, options?: RepositoryOptions): Promise<UserEntity | null> {
-    const row = await this.withRepository(UserOrmEntity, options, async (repo) => {
-      return await repo.findOne({
-        where: { id },
-        select: ['id', 'email', 'name'],
-      });
+  async findById(id: string): Promise<UserEntity | null> {
+    const row = await this.repo.findOne({
+      where: { id },
+      select: ['id', 'email', 'name'],
     });
     return row ? this.toDomain(row) : null;
   }
@@ -51,34 +41,27 @@ export class UserRepositoryTypeORMImpl extends BaseRepository<UserOrmEntity> imp
     page: number,
     limit: number,
     sortOrder: 'asc' | 'desc',
-    options?: RepositoryOptions,
   ): Promise<UserEntity[]> {
-    const rows = await this.withRepository(UserOrmEntity, options, async (repo) => {
-      return await repo.find({
-        order: { name: sortOrder === 'asc' ? 'ASC' : 'DESC' },
-        skip: (page - 1) * limit,
-        take: limit,
-        select: ['id', 'email', 'name'],
-      });
+    const rows = await this.repo.find({
+      order: { name: sortOrder === 'asc' ? 'ASC' : 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
+      select: ['id', 'email', 'name'],
     });
     return rows.map((row) => this.toDomain(row));
   }
 
   async update(id: string, user: UserEntity): Promise<UserEntity | null> {
-    const row = await this.withMasterRepository(UserOrmEntity, async (repo) => {
-      return await repo.findOne({
-        where: { id },
-        select: ['id', 'email', 'name'],
-      })
+    const row = await this.repo.findOne({
+      where: { id },
+      select: ['id', 'email', 'name'],
     });
     if (!row) {
       return null;
     }
     row.email = user.email;
     row.name = user.name;
-    await this.withMasterRepository(UserOrmEntity, async (repo) => {
-      await repo.save(row);
-    });
+    await this.repo.save(row);
     return this.toDomain(row);
   }
 
@@ -86,31 +69,22 @@ export class UserRepositoryTypeORMImpl extends BaseRepository<UserOrmEntity> imp
     id: string,
     user: Partial<UserEntity>,
   ): Promise<UserEntity | null> {
-    const row = await this.withMasterRepository(UserOrmEntity, async (repo) => {
-      return await repo.findOne({
-        where: { id },
-        select: ['id', 'email', 'name'],
-      })
+    const row = await this.repo.findOne({
+      where: { id },
+      select: ['id', 'email', 'name'],
     });
     if (!row) {
       return null;
     }
-    if (user.email !== undefined) {
-      row.email = user.email;
-    }
     if (user.name !== undefined) {
       row.name = user.name;
     }
-    await this.withMasterRepository(UserOrmEntity, async (repo) => {
-      await repo.save(row)
-    });
+    await this.repo.save(row);
     return this.toDomain(row);
   }
 
   async delete(id: string): Promise<boolean> {
-    const result = await this.withMasterRepository(UserOrmEntity, async (repo) => {
-      return await repo.delete({ id });
-    });
+    const result = await this.repo.delete({ id });
     return (result.affected ?? 0) > 0;
   }
 

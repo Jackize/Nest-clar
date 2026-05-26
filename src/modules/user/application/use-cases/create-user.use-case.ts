@@ -19,7 +19,7 @@ export class CreateUserUseCase {
   ) { }
 
   async execute(input: CreateUserInput): Promise<UserEntity> {
-    const existingUser = await this.userRepository.findByEmail(input.email, { consistency: ReadConsistency.STRONG });
+    const existingUser = await this.userRepository.findByEmail(input.email.trim(), { consistency: ReadConsistency.STRONG });
     if (existingUser) {
       throw new DomainError('User already exists', 'USER_ALREADY_EXISTS');
     }

@@ -8,7 +8,7 @@ import { PatchUserUseCase } from './application/use-cases/patch-user.use-case';
 import { UpdateUserUseCase } from './application/use-cases/update-user.use-case';
 import { UserDomainErrorHttpStatusRegistrar } from './http/user-domain-error-http-status.registrar';
 import { UserOrmEntity } from './infrastructure/persistence/user.orm-entity';
-import { UserRepositoryTypeORMImpl } from './infrastructure/repositories/user.repository.typeorm.impl';
+import { UserRepositoryTypeORMReplicaImpl } from './infrastructure/repositories/user.repository.typeorm.replica.impl';
 import { UserController } from './interfaces/controllers/user.controller';
 import { USER_REPOSITORY } from './user.di-token';
 
@@ -23,10 +23,10 @@ import { USER_REPOSITORY } from './user.di-token';
     UpdateUserUseCase,
     PatchUserUseCase,
     DeleteUserByIdUseCase,
-    UserRepositoryTypeORMImpl,
+    UserRepositoryTypeORMReplicaImpl,
     {
       provide: USER_REPOSITORY,
-      useExisting: UserRepositoryTypeORMImpl,
+      useExisting: UserRepositoryTypeORMReplicaImpl,
     },
   ],
 })

@@ -1,4 +1,5 @@
 import { DomainError } from '@/common/errors/domain.error';
+import { ReadConsistency } from '@/database/enums/read-consistency.enum';
 import { UserEntity } from '@/modules/user/domain/entities/user.entity';
 import type { IUserRepository } from '@/modules/user/domain/repositories/user.repository.interface';
 import { USER_REPOSITORY } from '@/modules/user/user.di-token';
@@ -15,10 +16,10 @@ export class CreateUserUseCase {
   constructor(
     @Inject(USER_REPOSITORY)
     private readonly userRepository: IUserRepository,
-  ) {}
+  ) { }
 
   async execute(input: CreateUserInput): Promise<UserEntity> {
-    const existingUser = await this.userRepository.findByEmail(input.email);
+    const existingUser = await this.userRepository.findByEmail(input.email, { consistency: ReadConsistency.STRONG });
     if (existingUser) {
       throw new DomainError('User already exists', 'USER_ALREADY_EXISTS');
     }

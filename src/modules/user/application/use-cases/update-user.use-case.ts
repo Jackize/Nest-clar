@@ -17,15 +17,8 @@ export class UpdateUserUseCase {
   ) {}
 
   async execute(id: string, input: UpdateUserInput): Promise<UserEntity> {
-    const newInformationUser = new UserEntity(
-      id,
-      input.email.trim(),
-      input.name.trim().toLowerCase(),
-    );
-    const updatedUser = await this.userRepository.update(
-      id,
-      newInformationUser,
-    );
+    const newInformationUser = new UserEntity(id, input.email.trim(), input.name.trim().toLowerCase());
+    const updatedUser = await this.userRepository.update(id, newInformationUser);
     if (!updatedUser) {
       throw new DomainError('User not found', 'USER_NOT_FOUND');
     }

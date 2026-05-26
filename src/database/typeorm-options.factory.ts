@@ -8,10 +8,7 @@ function isTruthy(value: string | undefined): boolean {
 
 function getPostgresCredentials(
   config: ConfigService,
-): Pick<
-  PostgresConnectionCredentialsOptions,
-  'username' | 'password' | 'database'
-> {
+): Pick<PostgresConnectionCredentialsOptions, 'username' | 'password' | 'database'> {
   return {
     username: config.get<string>('POSTGRES_USER', 'postgres'),
     password: config.get<string>('POSTGRES_PASSWORD', 'postgres'),
@@ -26,9 +23,7 @@ function getCommonOptions(
 
   return {
     autoLoadEntities: true,
-    synchronize:
-      nodeEnv !== 'production' &&
-      config.get<string>('TYPEORM_SYNC', 'false') === 'true',
+    synchronize: nodeEnv !== 'production' && config.get<string>('TYPEORM_SYNC', 'false') === 'true',
     logging: nodeEnv !== 'production',
   };
 }
@@ -46,18 +41,12 @@ function createReplicationOptions(config: ConfigService): TypeOrmModuleOptions {
     {
       ...credentials,
       host: config.get<string>('POSTGRES_REPLICA_1_HOST', 'localhost'),
-      port: Number.parseInt(
-        config.get<string>('POSTGRES_REPLICA_1_PORT', '5433'),
-        10,
-      ),
+      port: Number.parseInt(config.get<string>('POSTGRES_REPLICA_1_PORT', '5433'), 10),
     },
     {
       ...credentials,
       host: config.get<string>('POSTGRES_REPLICA_2_HOST', 'localhost'),
-      port: Number.parseInt(
-        config.get<string>('POSTGRES_REPLICA_2_PORT', '5434'),
-        10,
-      ),
+      port: Number.parseInt(config.get<string>('POSTGRES_REPLICA_2_PORT', '5434'), 10),
     },
   ];
 
@@ -75,9 +64,7 @@ function createReplicationOptions(config: ConfigService): TypeOrmModuleOptions {
   };
 }
 
-export function createTypeOrmOptions(
-  config: ConfigService,
-): TypeOrmModuleOptions {
+export function createTypeOrmOptions(config: ConfigService): TypeOrmModuleOptions {
   if (isTruthy(config.get<string>('POSTGRES_REPLICATION'))) {
     return createReplicationOptions(config);
   }

@@ -1,10 +1,11 @@
+import { CommonHttpModule } from '@/common/http/common-http.module';
+import { DatabaseModule } from '@/database/database.module';
+import { createTypeOrmOptions } from '@/database/typeorm-options.factory';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { CommonHttpModule } from '@/common/http/common-http.module';
-import { createTypeOrmOptions } from '@/database/typeorm-options.factory';
 import { UserModule } from './modules/user/user.module';
 
 @Module({
@@ -18,6 +19,7 @@ import { UserModule } from './modules/user/user.module';
       inject: [ConfigService],
       useFactory: createTypeOrmOptions,
     }),
+    DatabaseModule,
     CommonHttpModule,
     UserModule,
   ],

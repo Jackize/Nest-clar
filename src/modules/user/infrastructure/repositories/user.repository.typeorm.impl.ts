@@ -37,11 +37,7 @@ export class UserRepositoryTypeORMImpl implements IUserRepository {
     return row ? this.toDomain(row) : null;
   }
 
-  async findAll(
-    page: number,
-    limit: number,
-    sortOrder: 'asc' | 'desc',
-  ): Promise<UserEntity[]> {
+  async findAll(page: number, limit: number, sortOrder: 'asc' | 'desc'): Promise<UserEntity[]> {
     const rows = await this.repo.find({
       order: { name: sortOrder === 'asc' ? 'ASC' : 'DESC' },
       skip: (page - 1) * limit,
@@ -65,10 +61,7 @@ export class UserRepositoryTypeORMImpl implements IUserRepository {
     return this.toDomain(row);
   }
 
-  async patch(
-    id: string,
-    user: Partial<UserEntity>,
-  ): Promise<UserEntity | null> {
+  async patch(id: string, user: Partial<UserEntity>): Promise<UserEntity | null> {
     const row = await this.repo.findOne({
       where: { id },
       select: ['id', 'email', 'name'],

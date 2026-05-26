@@ -19,16 +19,10 @@ export class UserRepositoryImpl implements IUserRepository {
     return this.users.find((user) => user.id === id) ?? null;
   }
 
-  async findAll(
-    page: number,
-    limit: number,
-    sortOrder: 'asc' | 'desc',
-  ): Promise<UserEntity[]> {
+  async findAll(page: number, limit: number, sortOrder: 'asc' | 'desc'): Promise<UserEntity[]> {
     return this.users
       .sort((a, b) => {
-        return sortOrder === 'asc'
-          ? a.name.localeCompare(b.name)
-          : b.name.localeCompare(a.name);
+        return sortOrder === 'asc' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
       })
       .slice((page - 1) * limit, page * limit);
   }
@@ -45,10 +39,7 @@ export class UserRepositoryImpl implements IUserRepository {
     return existing;
   }
 
-  async patch(
-    id: string,
-    user: Partial<UserEntity>,
-  ): Promise<UserEntity | null> {
+  async patch(id: string, user: Partial<UserEntity>): Promise<UserEntity | null> {
     const index = this.users.findIndex((u) => u.id === id);
     if (index === -1) {
       return null;

@@ -11,18 +11,7 @@ import { UpdateUserUseCase } from '@/modules/user/application/use-cases/update-u
 import { CreateUserDto } from '@/modules/user/interfaces/dto/create-user.dto';
 import { UserApiSuccessResponseDto } from '@/modules/user/interfaces/dto/user-response.dto';
 import { UserMapper } from '@/modules/user/interfaces/mappers/user.mapper';
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  HttpStatus,
-  Param,
-  Patch,
-  Post,
-  Put,
-  Query,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Put, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { DeleteUserByIdUseCase } from '../../application/use-cases/delete-user-by-id.use-case';
 import { GetAllUserUseCase } from '../../application/use-cases/get-all-user.use-case';
@@ -58,11 +47,7 @@ export class UserController {
     NO_USERS_FOUND: HttpStatus.NOT_FOUND,
   })
   async getAll(@Query() query: GetAllPaginatedDto) {
-    const users = await this.getAllUsers.execute(
-      query.page ?? 1,
-      query.limit ?? 10,
-      query.sortOrder ?? 'asc',
-    );
+    const users = await this.getAllUsers.execute(query.page ?? 1, query.limit ?? 10, query.sortOrder ?? 'asc');
     return users.map(UserMapper.toResponse);
   }
 

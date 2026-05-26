@@ -36,10 +36,7 @@ export class UserEntity {
 
   private validateName(name: string): void {
     if (!name || name.trim().length < 2) {
-      throw new DomainError(
-        'Name must be at least 2 characters long',
-        'NAME_TOO_SHORT',
-      );
+      throw new DomainError('Name must be at least 2 characters long', 'NAME_TOO_SHORT');
     }
   }
 }

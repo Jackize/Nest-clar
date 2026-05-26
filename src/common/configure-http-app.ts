@@ -17,8 +17,5 @@ export function configureHttpApp(app: INestApplication): void {
 
   setupSwagger(app);
 
-  app.useGlobalInterceptors(
-    new RequestLoggingInterceptor(),
-    new ResponseInterceptor(),
-  );
+  app.useGlobalInterceptors(new RequestLoggingInterceptor(), new ResponseInterceptor());
 }

@@ -12,13 +12,9 @@ export type ApiDomainErrorSpec =
       description?: string;
     };
 
-export function normalizeDomainErrors(
-  domainErrors: ApiDomainErrorSpec[] | DomainErrorHttpStatusMap,
-) {
+export function normalizeDomainErrors(domainErrors: ApiDomainErrorSpec[] | DomainErrorHttpStatusMap) {
   return Array.isArray(domainErrors)
-    ? domainErrors.map((spec) =>
-        typeof spec === 'string' ? { code: spec } : spec,
-      )
+    ? domainErrors.map((spec) => (typeof spec === 'string' ? { code: spec } : spec))
     : Object.entries(domainErrors).map(([code, status]) => ({ code, status }));
 }
 
@@ -44,9 +40,7 @@ function defaultMessageFromCode(code: string) {
   return code.split('_').join(' ').toLocaleLowerCase();
 }
 
-export function ApiDomainErrors(
-  domainErrors: ApiDomainErrorSpec[] | DomainErrorHttpStatusMap = [],
-) {
+export function ApiDomainErrors(domainErrors: ApiDomainErrorSpec[] | DomainErrorHttpStatusMap = []) {
   const normalized = normalizeDomainErrors(domainErrors);
   const grouped = groupByStatus(normalized);
 
@@ -70,10 +64,7 @@ export function ApiDomainErrors(
 
     return ApiResponse({
       status,
-      description:
-        errs.length === 1
-          ? `Error: ${errs[0]!.code}`
-          : `Errors: ${errs.map((e) => e.code).join(', ')}`,
+      description: errs.length === 1 ? `Error: ${errs[0]!.code}` : `Errors: ${errs.map((e) => e.code).join(', ')}`,
       content: {
         'application/json': {
           schema: { $ref: getSchemaPath(ApiErrorResponseDto) },
@@ -83,10 +74,7 @@ export function ApiDomainErrors(
     });
   });
 
-  return applyDecorators(
-    ApiExtraModels(ApiErrorResponseDto),
-    ...errorResponses,
-  );
+  return applyDecorators(ApiExtraModels(ApiErrorResponseDto), ...errorResponses);
 }
 
 export type ApiSuccessDto = Type<unknown>;

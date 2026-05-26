@@ -1,14 +1,6 @@
 import { DomainError } from '@/common/errors/domain.error';
 import { DomainErrorHttpMapper } from '@/common/http/domain-error-http.mapper';
-import {
-  ArgumentsHost,
-  Catch,
-  ExceptionFilter,
-  HttpException,
-  HttpStatus,
-  Injectable,
-  Logger,
-} from '@nestjs/common';
+import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { Response } from 'express';
 
 @Catch()
@@ -44,9 +36,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         success: false,
         code: HttpStatus[status],
         message:
-          typeof payload === 'object' &&
-          payload !== null &&
-          'message' in payload
+          typeof payload === 'object' && payload !== null && 'message' in payload
             ? (payload as { message: string | string[] }).message
             : exception.message,
         timestamp: new Date().toISOString(),

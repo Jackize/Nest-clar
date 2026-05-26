@@ -8,9 +8,7 @@ export class DomainErrorHttpStatusRegistry {
   register(map: DomainErrorHttpStatusMap): void {
     for (const [code, status] of Object.entries(map)) {
       if (this.merged[code] && this.merged[code] !== status) {
-        throw new Error(
-          `Conflict detected: Error code "${code}" is already registered with a different status.`,
-        );
+        throw new Error(`Conflict detected: Error code "${code}" is already registered with a different status.`);
       }
       this.merged[code] = status;
     }

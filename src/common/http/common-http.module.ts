@@ -5,12 +5,7 @@ import { GlobalExceptionFilter } from '@/common/filters/global-exception.filter'
 
 @Global()
 @Module({
-  providers: [
-    DomainErrorHttpStatusRegistry,
-    DomainErrorHttpMapper,
-    GlobalExceptionFilter,
-  ],
+  providers: [DomainErrorHttpStatusRegistry, DomainErrorHttpMapper, GlobalExceptionFilter],
   exports: [DomainErrorHttpStatusRegistry, DomainErrorHttpMapper, GlobalExceptionFilter],
 })
 export class CommonHttpModule {}
-

@@ -30,7 +30,7 @@ export class ReplicaCircuitBreakerService {
       if (shouldRetry) {
         this.state = CircuitState.HALF_OPEN;
 
-        this.logger.warn('Circuit moved to HALF_OPEN');
+        this.logger.warn('Circuit replica moved to HALF_OPEN');
 
         return true;
       }
@@ -43,7 +43,7 @@ export class ReplicaCircuitBreakerService {
 
   onSuccess(): void {
     if (this.state === CircuitState.HALF_OPEN) {
-      this.logger.log('Circuit closed again');
+      this.logger.log('Circuit replica closed again');
     }
 
     this.failureCount = 0;
@@ -61,15 +61,14 @@ export class ReplicaCircuitBreakerService {
       this.failureCount = this.FAILURE_THRESHOLD;
       this.state = CircuitState.OPEN;
       this.logger.error(
-        'Replica circuit opened after connection failure',
-        error instanceof Error ? error.stack : undefined,
+        `Replica circuit opened after connection failure: ${error instanceof Error ? error.message : undefined}`,
       );
       return;
     }
 
     this.failureCount++;
 
-    this.logger.error(`Replica failure count: ${this.failureCount}`, error instanceof Error ? error.stack : undefined);
+    this.logger.error(`Replica failure: ${error instanceof Error ? error.message : undefined}`);
     if (this.failureCount >= this.FAILURE_THRESHOLD) {
       this.state = CircuitState.OPEN;
       this.logger.error('Replica circuit opened');

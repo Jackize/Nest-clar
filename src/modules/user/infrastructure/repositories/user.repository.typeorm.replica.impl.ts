@@ -1,4 +1,3 @@
-import { ReplicaCircuitBreakerService } from '@/database/circuit-breaker/replica-circuit-breaker.service';
 import { RepositoryOptions } from '@/database/interfaces/repository-options.interface';
 import { BaseRepository } from '@/database/repositories/base.repository';
 import { UserEntity } from '@/modules/user/domain/entities/user.entity';
@@ -13,9 +12,8 @@ export class UserRepositoryTypeORMReplicaImpl extends BaseRepository<UserOrmEnti
   constructor(
     @InjectDataSource()
     dataSource: DataSource,
-    circuitBreaker: ReplicaCircuitBreakerService,
   ) {
-    super(dataSource, circuitBreaker);
+    super(dataSource);
   }
 
   async save(user: UserEntity): Promise<UserEntity> {

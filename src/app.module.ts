@@ -6,6 +6,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { HealthCheckModule } from './modules/health-check/health-check.module';
 import { UserModule } from './modules/user/user.module';
 
 @Module({
@@ -20,6 +21,7 @@ import { UserModule } from './modules/user/user.module';
       useFactory: createTypeOrmOptions,
     }),
     DatabaseModule,
+    HealthCheckModule,
     CommonHttpModule,
     UserModule,
   ],

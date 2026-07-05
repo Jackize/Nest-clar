@@ -29,5 +29,6 @@ import { USER_REPOSITORY } from './user.di-token';
       useExisting: UserRepositoryTypeORMReplicaImpl,
     },
   ],
+  exports: [USER_REPOSITORY],
 })
 export class UserModule {}

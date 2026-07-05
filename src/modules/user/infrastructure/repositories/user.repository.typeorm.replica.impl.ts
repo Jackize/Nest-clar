@@ -22,6 +22,7 @@ export class UserRepositoryTypeORMReplicaImpl extends BaseRepository<UserOrmEnti
         id: user.id,
         email: user.email,
         name: user.name,
+        passwordHash: user.passwordHash ?? null,
       });
     });
     return user;
@@ -31,7 +32,7 @@ export class UserRepositoryTypeORMReplicaImpl extends BaseRepository<UserOrmEnti
     const row = await this.withRepository(UserOrmEntity, options, async (repo) => {
       return await repo.findOne({
         where: { email },
-        select: ['id', 'email', 'name'],
+        select: ['id', 'email', 'name', 'passwordHash'],
       });
     });
     return row ? this.toDomain(row) : null;
@@ -41,7 +42,7 @@ export class UserRepositoryTypeORMReplicaImpl extends BaseRepository<UserOrmEnti
     const row = await this.withRepository(UserOrmEntity, options, async (repo) => {
       return await repo.findOne({
         where: { id },
-        select: ['id', 'email', 'name'],
+        select: ['id', 'email', 'name', 'passwordHash'],
       });
     });
     return row ? this.toDomain(row) : null;
@@ -108,6 +109,7 @@ export class UserRepositoryTypeORMReplicaImpl extends BaseRepository<UserOrmEnti
   }
 
   private toDomain(row: UserOrmEntity): UserEntity {
-    return new UserEntity(row.id, row.email, row.name);
+    const user = new UserEntity(row.id, row.email, row.name, row.passwordHash ?? undefined);
+    return user;
   }
 }

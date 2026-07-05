@@ -5,6 +5,7 @@ export class UserEntity {
     public readonly id: string,
     private _email: string,
     private _name: string,
+    private _passwordHash?: string,
   ) {
     this.validateEmail(_email);
     this.validateName(_name);
@@ -16,6 +17,14 @@ export class UserEntity {
 
   get name(): string {
     return this._name;
+  }
+
+  get passwordHash(): string | undefined {
+    return this._passwordHash;
+  }
+
+  setPasswordHash(hash: string): void {
+    this._passwordHash = hash;
   }
 
   changeEmail(newEmail: string): void {

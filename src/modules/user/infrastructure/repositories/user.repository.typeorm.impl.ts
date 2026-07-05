@@ -17,6 +17,7 @@ export class UserRepositoryTypeORMImpl implements IUserRepository {
       id: user.id,
       email: user.email,
       name: user.name,
+      passwordHash: user.passwordHash ?? null,
     });
     return user;
   }
@@ -24,7 +25,7 @@ export class UserRepositoryTypeORMImpl implements IUserRepository {
   async findByEmail(email: string): Promise<UserEntity | null> {
     const row = await this.repo.findOne({
       where: { email },
-      select: ['id', 'email', 'name'],
+      select: ['id', 'email', 'name', 'passwordHash'],
     });
     return row ? this.toDomain(row) : null;
   }
@@ -85,6 +86,6 @@ export class UserRepositoryTypeORMImpl implements IUserRepository {
   }
 
   private toDomain(row: UserOrmEntity): UserEntity {
-    return new UserEntity(row.id, row.email, row.name);
+    return new UserEntity(row.id, row.email, row.name, row.passwordHash ?? undefined);
   }
 }

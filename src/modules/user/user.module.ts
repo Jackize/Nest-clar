@@ -1,34 +1,45 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthModule } from '@/modules/auth/auth.module';
+import { TypeormRefreshTokenRepository } from '@/modules/auth/infrastructure/persistence/typeorm-refresh-token.repository';
 import { CreateUserUseCase } from './application/use-cases/create-user.use-case';
-import { DeleteUserByIdUseCase } from './application/use-cases/delete-user-by-id.use-case';
-import { GetAllUserUseCase } from './application/use-cases/get-all-user.use-case';
-import { GetUserByIdUseCase } from './application/use-cases/get-user-by-id.use-case';
-import { PatchUserUseCase } from './application/use-cases/patch-user.use-case';
-import { UpdateUserUseCase } from './application/use-cases/update-user.use-case';
+import { DeleteUserUseCase } from './application/use-cases/delete-user.use-case';
+import { DeductQuotaUseCase } from './application/use-cases/deduct-quota.use-case';
+import { GetUserProfileUseCase } from './application/use-cases/get-user-profile.use-case';
+import { RefundQuotaUseCase } from './application/use-cases/refund-quota.use-case';
+import { UpdateUserProfileUseCase } from './application/use-cases/update-user-profile.use-case';
 import { UserDomainErrorHttpStatusRegistrar } from './http/user-domain-error-http-status.registrar';
+import { OwnerOrAdminGuard } from './infrastructure/http/owner-or-admin.guard';
+import { UsersController } from './infrastructure/http/users.controller';
+import { RefreshTokenRepositoryAdapter } from './infrastructure/persistence/refresh-token-repository.adapter';
 import { UserOrmEntity } from './infrastructure/persistence/user.orm-entity';
-import { UserRepositoryTypeORMReplicaImpl } from './infrastructure/repositories/user.repository.typeorm.replica.impl';
-import { UserController } from './interfaces/controllers/user.controller';
-import { USER_REPOSITORY } from './user.di-token';
+import { TypeormUserRepository } from './infrastructure/persistence/typeorm-user.repository';
+import { REFRESH_TOKEN_REPOSITORY_PORT, USER_REPOSITORY } from './user.di-token';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UserOrmEntity])],
-  controllers: [UserController],
+  imports: [TypeOrmModule.forFeature([UserOrmEntity]), forwardRef(() => AuthModule)],
+  controllers: [UsersController],
   providers: [
     UserDomainErrorHttpStatusRegistrar,
     CreateUserUseCase,
-    GetUserByIdUseCase,
-    GetAllUserUseCase,
-    UpdateUserUseCase,
-    PatchUserUseCase,
-    DeleteUserByIdUseCase,
-    UserRepositoryTypeORMReplicaImpl,
+    GetUserProfileUseCase,
+    UpdateUserProfileUseCase,
+    DeductQuotaUseCase,
+    RefundQuotaUseCase,
+    DeleteUserUseCase,
+    TypeormUserRepository,
+    OwnerOrAdminGuard,
     {
       provide: USER_REPOSITORY,
-      useExisting: UserRepositoryTypeORMReplicaImpl,
+      useExisting: TypeormUserRepository,
+    },
+    {
+      provide: REFRESH_TOKEN_REPOSITORY_PORT,
+      useFactory: (refreshTokenRepository: TypeormRefreshTokenRepository) =>
+        new RefreshTokenRepositoryAdapter(refreshTokenRepository),
+      inject: [TypeormRefreshTokenRepository],
     },
   ],
-  exports: [USER_REPOSITORY],
+  exports: [USER_REPOSITORY, CreateUserUseCase, DeductQuotaUseCase, RefundQuotaUseCase],
 })
 export class UserModule {}

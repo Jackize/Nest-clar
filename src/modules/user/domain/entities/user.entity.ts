@@ -1,51 +1,93 @@
-import { DomainError } from '@/common/errors/domain.error';
+import { QuotaBalance } from '../value-objects/quota-balance.vo';
 
-export class UserEntity {
-  constructor(
+export type UserProps = {
+  id: string;
+  email: string;
+  displayName: string;
+  avatarUrl?: string | null;
+  passwordHash?: string;
+  quotaRemaining?: QuotaBalance;
+  deletedAt?: Date | null;
+};
+
+export class User {
+  private constructor(
     public readonly id: string,
     private _email: string,
-    private _name: string,
-    private _passwordHash?: string,
-  ) {
-    this.validateEmail(_email);
-    this.validateName(_name);
+    private _displayName: string,
+    private _avatarUrl: string | null,
+    private _passwordHash: string | undefined,
+    private _quotaRemaining: QuotaBalance,
+    private _deletedAt: Date | null,
+  ) {}
+
+  static create(props: { id: string; email: string; passwordHash?: string; displayName?: string }): User {
+    const displayName = props.displayName ?? props.email.split('@')[0];
+    return new User(
+      props.id,
+      props.email.trim().toLowerCase(),
+      displayName,
+      null,
+      props.passwordHash,
+      new QuotaBalance(10),
+      null,
+    );
+  }
+
+  static reconstitute(props: UserProps): User {
+    return new User(
+      props.id,
+      props.email,
+      props.displayName,
+      props.avatarUrl ?? null,
+      props.passwordHash,
+      props.quotaRemaining ?? new QuotaBalance(10),
+      props.deletedAt ?? null,
+    );
   }
 
   get email(): string {
     return this._email;
   }
 
-  get name(): string {
-    return this._name;
+  get displayName(): string {
+    return this._displayName;
+  }
+
+  get avatarUrl(): string | null {
+    return this._avatarUrl;
   }
 
   get passwordHash(): string | undefined {
     return this._passwordHash;
   }
 
-  setPasswordHash(hash: string): void {
-    this._passwordHash = hash;
+  get quotaRemaining(): QuotaBalance {
+    return this._quotaRemaining;
   }
 
-  changeEmail(newEmail: string): void {
-    this.validateEmail(newEmail);
-    this._email = newEmail;
+  get deletedAt(): Date | null {
+    return this._deletedAt;
   }
 
-  updateName(name: string) {
-    this.validateName(name);
-    this._name = name;
-  }
-
-  private validateEmail(email: string): void {
-    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-      throw new DomainError('Invalid email', 'INVALID_EMAIL');
+  updateProfile(props: { displayName?: string; avatarUrl?: string | null }): void {
+    if (props.displayName !== undefined) {
+      this._displayName = props.displayName;
+    }
+    if (props.avatarUrl !== undefined) {
+      this._avatarUrl = props.avatarUrl;
     }
   }
 
-  private validateName(name: string): void {
-    if (!name || name.trim().length < 2) {
-      throw new DomainError('Name must be at least 2 characters long', 'NAME_TOO_SHORT');
-    }
+  deductQuota(): void {
+    this._quotaRemaining = this._quotaRemaining.decrement();
+  }
+
+  refundQuota(amount = 1): void {
+    this._quotaRemaining = this._quotaRemaining.increment(amount);
+  }
+
+  markDeleted(deletedAt: Date): void {
+    this._deletedAt = deletedAt;
   }
 }

@@ -5,9 +5,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { App } from 'supertest/types';
 
-describe('User API (integration)', () => {
-  let app: INestApplication<App>;
-  let createdUserId: string;
+describe('User API (e2e)', () => {
+  let app: INestApplication;
+  let userId: string;
+  let accessToken: string;
+  let otherUserToken: string;
 
   beforeAll(async () => {
     const moduleRef: TestingModule = await Test.createTestingModule({
@@ -22,118 +24,223 @@ describe('User API (integration)', () => {
     await app.close();
   });
 
-  it('should create a user', async () => {
-    const response = await request(app.getHttpServer()).post('/users').send({
-      email: 'test@example.com',
-      name: 'Test User',
+  it('POST /auth/register creates a user with default quota', async () => {
+    const email = `user-${Date.now()}@example.com`;
+    const response = await request(app.getHttpServer()).post('/auth/register').send({
+      email,
+      password: 'password123',
     });
+
     expect(response.status).toBe(201);
-    expect(response.body.success).toBe(true);
-    expect(response.body.data.email).toBe('test@example.com');
-    expect(response.body.data.name).toBe('test user');
-    expect(typeof response.body.data.id).toBe('string');
-    expect(response.body.data.id.length).toBeGreaterThan(0);
-    createdUserId = response.body.data.id;
+    userId = response.body.data.id;
+    expect(response.body.data.email).toBe(email);
   });
 
-  it('should return 409 if user already exists', async () => {
-    const response = await request(app.getHttpServer()).post('/users').send({
-      email: 'test@example.com',
-      name: 'Test User',
+  it('POST /auth/login returns access token', async () => {
+    const email = `user-${Date.now()}@example.com`;
+    await request(app.getHttpServer()).post('/auth/register').send({
+      email,
+      password: 'password123',
     });
-    expect(response.status).toBe(409);
-  });
 
-  it('should get a user by id', async () => {
-    const response = await request(app.getHttpServer()).get(`/users/${createdUserId}`);
-    expect(response.status).toBe(200);
-    expect(response.body.success).toBe(true);
-    expect(response.body.data.email).toBe('test@example.com');
-    expect(response.body.data.name).toBe('test user');
-    expect(response.body.timestamp).toBeDefined();
-    expect(response.body.path).toBe(`/users/${createdUserId}`);
-  });
-
-  it('should get all users', async () => {
-    const response = await request(app.getHttpServer()).get('/users');
-    expect(response.status).toBe(200);
-    expect(response.body.success).toBe(true);
-    expect(response.body.data.length).toBeGreaterThan(0);
-    expect(response.body.data[0].email).toBe('test@example.com');
-    expect(response.body.data[0].name).toBe('test user');
-    expect(response.body.timestamp).toBeDefined();
-    expect(response.body.path).toBe('/users');
-  });
-
-  it('should update a user', async () => {
-    const response = await request(app.getHttpServer()).put(`/users/${createdUserId}`).send({
-      email: 'test2@example.com',
-      name: 'Test User 2',
+    const loginResponse = await request(app.getHttpServer()).post('/auth/login').send({
+      email,
+      password: 'password123',
     });
-    expect(response.status).toBe(200);
-    expect(response.body.success).toBe(true);
-    expect(response.body.data.email).toBe('test2@example.com');
-    expect(response.body.data.name).toBe('test user 2');
-    expect(response.body.timestamp).toBeDefined();
-    expect(response.body.path).toBe(`/users/${createdUserId}`);
+
+    expect(loginResponse.status).toBe(200);
+    accessToken = loginResponse.body.data.accessToken;
+    userId = loginResponse.body.data.userId ?? userId;
   });
 
-  it('should patch a user', async () => {
-    const response = await request(app.getHttpServer()).patch(`/users/${createdUserId}`).send({
-      email: 'test3@example.com',
-      name: 'Test User 3',
+  it('GET /users/me returns the authenticated user without passwordHash', async () => {
+    const email = `me-${Date.now()}@example.com`;
+    const registerResponse = await request(app.getHttpServer()).post('/auth/register').send({
+      email,
+      password: 'password123',
     });
-    expect(response.status).toBe(200);
-    expect(response.body.success).toBe(true);
-    expect(response.body.data.email).toBe('test3@example.com');
-    expect(response.body.data.name).toBe('Test User 3');
-    expect(response.body.timestamp).toBeDefined();
-    expect(response.body.path).toBe(`/users/${createdUserId}`);
-  });
-
-  it('should delete a user', async () => {
-    const response = await request(app.getHttpServer()).delete(`/users/${createdUserId}`);
-    expect(response.status).toBe(200);
-    expect(response.body.success).toBe(true);
-    expect(response.body.timestamp).toBeDefined();
-    expect(response.body.path).toBe(`/users/${createdUserId}`);
-  });
-
-  it('should return 404 if user not found when getting a user by id', async () => {
-    const response = await request(app.getHttpServer()).get(`/users/1234567890`);
-    expect(response.status).toBe(404);
-    expect(response.body.success).toBe(false);
-    expect(response.body.code).toBe('USER_NOT_FOUND');
-    expect(response.body.message).toBe('User not found');
-    expect(response.body.timestamp).toBeDefined();
-    expect(response.body.path).toBe(`/users/1234567890`);
-  });
-
-  it('should return 404 if no users found when updating a user', async () => {
-    const response = await request(app.getHttpServer()).put('/users/1234567890').send({
-      email: 'test@example.com',
-      name: 'Test User',
+    const loginResponse = await request(app.getHttpServer()).post('/auth/login').send({
+      email,
+      password: 'password123',
     });
-    expect(response.status).toBe(404);
-    expect(response.body.success).toBe(false);
-    expect(response.body.code).toBe('USER_NOT_FOUND');
-    expect(response.body.message).toBe('User not found');
+    const token = loginResponse.body.data.accessToken;
+    const id = registerResponse.body.data.id;
+
+    const response = await request(app.getHttpServer()).get('/users/me').set('Authorization', `Bearer ${token}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body.data.id).toBe(id);
+    expect(response.body.data.quotaRemaining).toBe(10);
+    expect(response.body.data).not.toHaveProperty('passwordHash');
   });
 
-  it('should return 404 if no users found when deleting a user', async () => {
-    const response = await request(app.getHttpServer()).delete('/users/1234567890');
-    expect(response.status).toBe(404);
-    expect(response.body.success).toBe(false);
-    expect(response.body.code).toBe('USER_NOT_FOUND');
-    expect(response.body.message).toBe('User not found');
-  });
-
-  it('should return 404 if no users found when patching a user', async () => {
-    const response = await request(app.getHttpServer()).patch('/users/1234567890').send({
-      email: 'test@example.com',
-      name: 'Test User',
+  it('GET /users/:id returns 200 for owner and excludes passwordHash', async () => {
+    const email = `owner-${Date.now()}@example.com`;
+    const registerResponse = await request(app.getHttpServer()).post('/auth/register').send({
+      email,
+      password: 'password123',
     });
-    expect(response.status).toBe(404);
-    expect(response.body.success).toBe(false);
+    const loginResponse = await request(app.getHttpServer()).post('/auth/login').send({
+      email,
+      password: 'password123',
+    });
+    const token = loginResponse.body.data.accessToken;
+    const id = registerResponse.body.data.id;
+
+    const response = await request(app.getHttpServer()).get(`/users/${id}`).set('Authorization', `Bearer ${token}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body.data.id).toBe(id);
+    expect(response.body.data).not.toHaveProperty('passwordHash');
+  });
+
+  it('GET /users/:id returns 403 for a different user', async () => {
+    const ownerEmail = `owner403-${Date.now()}@example.com`;
+    const otherEmail = `other403-${Date.now()}@example.com`;
+
+    const ownerRegister = await request(app.getHttpServer()).post('/auth/register').send({
+      email: ownerEmail,
+      password: 'password123',
+    });
+    await request(app.getHttpServer()).post('/auth/register').send({
+      email: otherEmail,
+      password: 'password123',
+    });
+
+    const otherLogin = await request(app.getHttpServer()).post('/auth/login').send({
+      email: otherEmail,
+      password: 'password123',
+    });
+    otherUserToken = otherLogin.body.data.accessToken;
+
+    const response = await request(app.getHttpServer())
+      .get(`/users/${ownerRegister.body.data.id}`)
+      .set('Authorization', `Bearer ${otherUserToken}`);
+
+    expect(response.status).toBe(403);
+  });
+
+  it('PATCH /users/:id updates displayName and avatarUrl for owner', async () => {
+    const email = `patch-${Date.now()}@example.com`;
+    const registerResponse = await request(app.getHttpServer()).post('/auth/register').send({
+      email,
+      password: 'password123',
+    });
+    const loginResponse = await request(app.getHttpServer()).post('/auth/login').send({
+      email,
+      password: 'password123',
+    });
+    const token = loginResponse.body.data.accessToken;
+    const id = registerResponse.body.data.id;
+
+    const response = await request(app.getHttpServer())
+      .patch(`/users/${id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        displayName: 'Updated Name',
+        avatarUrl: 'https://example.com/avatar.png',
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.data.displayName).toBe('Updated Name');
+    expect(response.body.data.avatarUrl).toBe('https://example.com/avatar.png');
+  });
+
+  it('PATCH /users/:id rejects unknown fields', async () => {
+    const email = `patch-reject-${Date.now()}@example.com`;
+    const registerResponse = await request(app.getHttpServer()).post('/auth/register').send({
+      email,
+      password: 'password123',
+    });
+    const loginResponse = await request(app.getHttpServer()).post('/auth/login').send({
+      email,
+      password: 'password123',
+    });
+    const token = loginResponse.body.data.accessToken;
+    const id = registerResponse.body.data.id;
+
+    const response = await request(app.getHttpServer())
+      .patch(`/users/${id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        quotaRemaining: 999,
+        passwordHash: 'malicious',
+      });
+
+    expect(response.status).toBe(400);
+  });
+
+  it('PATCH /users/:id returns 403 for a different user', async () => {
+    const ownerEmail = `patch-owner-${Date.now()}@example.com`;
+    const otherEmail = `patch-other-${Date.now()}@example.com`;
+
+    const ownerRegister = await request(app.getHttpServer()).post('/auth/register').send({
+      email: ownerEmail,
+      password: 'password123',
+    });
+    await request(app.getHttpServer()).post('/auth/register').send({
+      email: otherEmail,
+      password: 'password123',
+    });
+    const otherLogin = await request(app.getHttpServer()).post('/auth/login').send({
+      email: otherEmail,
+      password: 'password123',
+    });
+
+    const response = await request(app.getHttpServer())
+      .patch(`/users/${ownerRegister.body.data.id}`)
+      .set('Authorization', `Bearer ${otherLogin.body.data.accessToken}`)
+      .send({ displayName: 'Hacker' });
+
+    expect(response.status).toBe(403);
+  });
+
+  it('DELETE /users/:id returns 403 for a different user', async () => {
+    const ownerEmail = `delete-owner-${Date.now()}@example.com`;
+    const otherEmail = `delete-other-${Date.now()}@example.com`;
+
+    const ownerRegister = await request(app.getHttpServer()).post('/auth/register').send({
+      email: ownerEmail,
+      password: 'password123',
+    });
+    await request(app.getHttpServer()).post('/auth/register').send({
+      email: otherEmail,
+      password: 'password123',
+    });
+    const otherLogin = await request(app.getHttpServer()).post('/auth/login').send({
+      email: otherEmail,
+      password: 'password123',
+    });
+
+    const response = await request(app.getHttpServer())
+      .delete(`/users/${ownerRegister.body.data.id}`)
+      .set('Authorization', `Bearer ${otherLogin.body.data.accessToken}`);
+
+    expect(response.status).toBe(403);
+  });
+
+  it('DELETE /users/:id allows owner to delete account', async () => {
+    const email = `delete-self-${Date.now()}@example.com`;
+    const registerResponse = await request(app.getHttpServer()).post('/auth/register').send({
+      email,
+      password: 'password123',
+    });
+    const loginResponse = await request(app.getHttpServer()).post('/auth/login').send({
+      email,
+      password: 'password123',
+    });
+    const token = loginResponse.body.data.accessToken;
+    const id = registerResponse.body.data.id;
+
+    const deleteResponse = await request(app.getHttpServer())
+      .delete(`/users/${id}`)
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(deleteResponse.status).toBe(200);
+
+    const refreshResponse = await request(app.getHttpServer()).post('/auth/refresh').send({
+      refreshToken: loginResponse.body.data.refreshToken,
+    });
+    expect(refreshResponse.status).toBe(401);
   });
 });

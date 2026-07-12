@@ -1,14 +1,16 @@
+import { InvalidHashedPasswordException } from '../exceptions/invalid-hashed-password.exception';
+
 export class HashedPassword {
-  private readonly _hash: string;
+  private readonly value: string;
 
   constructor(hash: string) {
     if (!hash || hash.trim().length === 0) {
-      throw new Error('Hashed password cannot be empty');
+      throw new InvalidHashedPasswordException();
     }
-    this._hash = hash;
+    this.value = hash;
   }
 
-  get hash(): string {
-    return this._hash;
+  toString(): string {
+    return this.value;
   }
 }

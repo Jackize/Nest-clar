@@ -32,10 +32,7 @@ export class LoginUserUseCase {
     const user = await this.userRepository.findByEmail(email);
 
     if (!user?.passwordHash) {
-      await this.passwordHasher.compare(
-        input.password,
-        '$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW',
-      );
+      await this.passwordHasher.compare(input.password, '$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW');
       throw new InvalidCredentialsException();
     }
 

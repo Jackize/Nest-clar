@@ -5,14 +5,14 @@ import {
   RefreshTokenUseCaseProvider,
   RegisterUserUseCaseProvider,
 } from '@/modules/auth/infrastructure/providers/auth-use-case.providers';
-import { LoginDto } from '@/modules/auth/interfaces/dto/login.dto';
-import { LogoutDto } from '@/modules/auth/interfaces/dto/logout.dto';
-import { RefreshTokenDto } from '@/modules/auth/interfaces/dto/refresh-token.dto';
-import { RegisterDto } from '@/modules/auth/interfaces/dto/register.dto';
+import { LoginDto } from '@/modules/auth/application/dto/login.dto';
+import { LogoutDto } from '@/modules/auth/application/dto/logout.dto';
+import { RefreshTokenDto } from '@/modules/auth/application/dto/refresh-token.dto';
+import { RegisterDto } from '@/modules/auth/application/dto/register.dto';
+import { AuthTokensResponseDto, RegisterResponseDto } from '@/modules/auth/application/dto/auth-response.dto';
 import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
-import { AuthTokensResponseDto, RegisterResponseDto } from '../dto/auth-response.dto';
 
 @ApiTags('Auth')
 @Controller('auth')

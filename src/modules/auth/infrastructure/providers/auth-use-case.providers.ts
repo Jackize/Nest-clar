@@ -13,15 +13,17 @@ import {
   USER_REPOSITORY_PORT,
 } from '@/modules/auth/auth.di-token';
 import type { IRefreshTokenRepository } from '@/modules/auth/domain/repositories/refresh-token.repository.interface';
+import { CreateUserUseCase } from '@/modules/user/application/use-cases/create-user.use-case';
 import { Inject, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class RegisterUserUseCaseProvider {
   constructor(
     @Inject(USER_REPOSITORY_PORT) userRepository: UserRepositoryPort,
+    private readonly createUserUseCase: CreateUserUseCase,
     @Inject(PASSWORD_HASHER_PORT) passwordHasher: PasswordHasherPort,
   ) {
-    this.useCase = new RegisterUserUseCase(userRepository, passwordHasher);
+    this.useCase = new RegisterUserUseCase(userRepository, createUserUseCase, passwordHasher);
   }
 
   readonly useCase: RegisterUserUseCase;

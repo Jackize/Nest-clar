@@ -1,6 +1,7 @@
+import { CreateUserUseCase } from '@/modules/user/application/use-cases/create-user.use-case';
+import { User } from '@/modules/user/domain/entities/user.entity';
 import { EmailAlreadyExistsException } from '../../domain/exceptions/email-already-exists.exception';
 import { Email } from '../../domain/value-objects/email.vo';
-import { HashedPassword } from '../../domain/value-objects/hashed-password.vo';
 import { PasswordHasherPort } from '../ports/password-hasher.port';
 import { UserRepositoryPort } from '../ports/user-repository.port';
 
@@ -17,6 +18,7 @@ export type RegisterUserOutput = {
 export class RegisterUserUseCase {
   constructor(
     private readonly userRepository: UserRepositoryPort,
+    private readonly createUserUseCase: CreateUserUseCase,
     private readonly passwordHasher: PasswordHasherPort,
   ) {}
 
@@ -28,10 +30,12 @@ export class RegisterUserUseCase {
     }
 
     const hashed = await this.passwordHasher.hash(input.password);
-    const passwordHash = new HashedPassword(hashed);
-    const name = email.value.split('@')[0];
-
-    const user = await this.userRepository.create(email, passwordHash, name);
+    const displayName = email.value.split('@')[0];
+    const user = await this.createUserUseCase.execute({
+      email: email.value,
+      passwordHash: hashed,
+      displayName,
+    });
 
     return { id: user.id, email: user.email };
   }

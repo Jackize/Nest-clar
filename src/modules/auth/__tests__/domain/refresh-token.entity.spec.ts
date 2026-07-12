@@ -1,4 +1,4 @@
-import { RefreshTokenEntity } from './refresh-token.entity';
+import { RefreshTokenEntity } from '@/modules/auth/domain/entities/refresh-token.entity';
 
 describe('RefreshTokenEntity', () => {
   const createToken = (expiresAt: Date, revoked = false) =>
@@ -14,11 +14,13 @@ describe('RefreshTokenEntity', () => {
     expect(createToken(future).isExpired()).toBe(false);
   });
 
-  it('should revoke token', () => {
+  it('should revoke token without affecting isExpired()', () => {
     const future = new Date(Date.now() + 60_000);
     const token = createToken(future);
-    expect(token.isRevoked()).toBe(false);
+
     token.revoke();
+
     expect(token.isRevoked()).toBe(true);
+    expect(token.isExpired()).toBe(false);
   });
 });

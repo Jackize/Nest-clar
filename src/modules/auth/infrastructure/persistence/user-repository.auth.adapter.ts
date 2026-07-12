@@ -1,12 +1,12 @@
+import crypto from 'crypto';
 import { UserRepositoryPort } from '@/modules/auth/application/ports/user-repository.port';
 import { Email } from '@/modules/auth/domain/value-objects/email.vo';
 import { HashedPassword } from '@/modules/auth/domain/value-objects/hashed-password.vo';
 import { ReadConsistency } from '@/database/enums/read-consistency.enum';
-import { UserEntity } from '@/modules/user/domain/entities/user.entity';
-import type { IUserRepository } from '@/modules/user/domain/repositories/user.repository.interface';
+import { User } from '@/modules/user/domain/entities/user.entity';
+import type { IUserRepository } from '@/modules/user/domain/repositories/user-repository.interface';
 import { USER_REPOSITORY } from '@/modules/user/user.di-token';
 import { Inject, Injectable } from '@nestjs/common';
-import crypto from 'crypto';
 
 @Injectable()
 export class UserRepositoryAuthAdapter implements UserRepositoryPort {
@@ -36,12 +36,17 @@ export class UserRepositoryAuthAdapter implements UserRepositoryPort {
   }
 
   async create(email: Email, passwordHash: HashedPassword, name: string) {
-    const user = new UserEntity(crypto.randomUUID(), email.value, name, passwordHash.hash);
+    const user = User.create({
+      id: crypto.randomUUID(),
+      email: email.value,
+      passwordHash: passwordHash.toString(),
+      displayName: name,
+    });
     const saved = await this.userRepository.save(user);
     return this.toAuthUser(saved);
   }
 
-  private toAuthUser(user: UserEntity) {
+  private toAuthUser(user: User) {
     return {
       id: user.id,
       email: user.email,

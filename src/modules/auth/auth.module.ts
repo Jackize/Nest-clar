@@ -1,5 +1,5 @@
 import { UserModule } from '@/modules/user/user.module';
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
@@ -11,7 +11,7 @@ import {
   USER_REPOSITORY_PORT,
 } from '@/modules/auth/auth.di-token';
 import { AuthDomainErrorHttpStatusRegistrar } from '@/modules/auth/http/auth-domain-error-http-status.registrar';
-import { AuthController } from '@/modules/auth/interfaces/controllers/auth.controller';
+import { AuthController } from '@/modules/auth/infrastructure/http/auth.controller';
 import { JwtAuthGuard } from '@/modules/auth/infrastructure/http/jwt-auth.guard';
 import { JwtStrategy } from '@/modules/auth/infrastructure/http/jwt.strategy';
 import { RefreshTokenOrmEntity } from '@/modules/auth/infrastructure/persistence/refresh-token.orm-entity';
@@ -29,7 +29,7 @@ import { JwtTokenService } from '@/modules/auth/infrastructure/security/jwt-toke
 
 @Module({
   imports: [
-    UserModule,
+    forwardRef(() => UserModule),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({}),
     TypeOrmModule.forFeature([RefreshTokenOrmEntity]),
@@ -66,6 +66,6 @@ import { JwtTokenService } from '@/modules/auth/infrastructure/security/jwt-toke
       useExisting: TypeormRefreshTokenRepository,
     },
   ],
-  exports: [JwtAuthGuard, JwtModule, TOKEN_SERVICE_PORT],
+  exports: [JwtAuthGuard, JwtModule, TOKEN_SERVICE_PORT, TypeormRefreshTokenRepository],
 })
 export class AuthModule {}
